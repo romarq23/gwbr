@@ -9,7 +9,7 @@
 #' @param maxint A Maximum number of iterations to numerically maximize the log-likelihood function in search of the estimators. The default is \code{maxint=100}.
 #'
 #' @return A list that contains:
-#' 
+#'
 #' \itemize{
 #' \item \code{parameter_estimates} - Parameter estimates.
 #' \item \code{phi} - Precision parameter estimate.
@@ -21,14 +21,15 @@
 #' \item \code{link_function} - The link function used in modeling.
 #' \item \code{n_iter} - Number of iterations used in convergence.
 #' }
-#' 
+#'
 #' @examples
 #' data(saopaulo)
-#' output_list <- betareg_gwbr("prop_landline", c("prop_purb","prop_poor"), data = saopaulo, link = "logit")
-#' 
+#' output_list <- betareg_gwbr("prop_landline", c("prop_purb","prop_poor"),
+#' data = saopaulo, link = "logit")
+#'
 #' ## Parameters
 #' output_list$parameter_estimates
-#' 
+#'
 #' ## R2 and AICc
 #' output_list$r2
 #' output_list$aicc
@@ -45,16 +46,16 @@ betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglo
   }
   x <- as.matrix(cbind(x=matrix(1, n, 1), x))
   k <- as.numeric(ncol(x))
-  
+
   if(length(link)==4){
     link=c("logit")
   }
-  
+
   if(length(link)>1){
     print('ERROR: Link Function should be one of logit, loglog, cloglog or probit.')
     stop()
   }
-  
+
   if(toupper(link)=="LOGIT"){yc <- log(y/(1-y))}else{
     if(toupper(link)=="CLOGLOG"){yc <- log(-log(1-y))}else{
       if(toupper(link)=="LOGLOG"){yc <- -log(-log(y))}else{
@@ -65,10 +66,10 @@ betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglo
       }
     }
   }
-  
+
   betai <- solve(t(x)%*%x)%*%t(x)%*%yc
   e <- yc-x%*%betai
-  
+
   if(toupper(link)=="LOGIT"){
     linkf <- function(eta){
       ilink <- exp(eta)/(1+exp(eta))
@@ -79,7 +80,7 @@ betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglo
       return(links)
     }
   }
-  
+
   if(toupper(link)=="PROBIT"){
     linkf <- function(eta){
       ilink <- pnorm(eta)
@@ -89,7 +90,7 @@ betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglo
       return(links)
     }
   }
-  
+
   if(toupper(link)=="LOGLOG"){
     linkf <- function(eta){
       ilink <- exp(-exp(-eta))
@@ -100,7 +101,7 @@ betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglo
       return(links)
     }
   }
-  
+
   if(toupper(link)=="CLOGLOG"){
     linkf <- function(eta){
       ilink <- 1-exp(-exp(eta))
@@ -111,22 +112,22 @@ betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglo
       return(links)
     }
   }
-  
+
   etai <- x%*%betai
   mu <- linkf(etai)[,1]
   gmu <- linkf(etai)[,2]
   sigma2 <- as.numeric(t(e)%*%e)/(t((n-k)%*%gmu)*gmu)
-  
+
   phi <- 0
   for(i in 1:n){
     phi <- phi+mu[i]%*%(1-mu[i])/(sigma2[i]%*%n)
   }
   phi <- ifelse(phi<1, phi, phi-1)
-  
+
   param <- t(rbind(betai,phi))
-  
+
   it <- 0
-  
+
   max_like <- function(param){
     it <- it+1
     beta <- param[1:ncol(param)-1]
@@ -153,7 +154,7 @@ betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglo
   parami <- t(rbind(betai,phi))
   dif <- 1
   etai <- x%*%betai
-  
+
   phi <- as.numeric(phi)
   repeat{
     mu <- linkf(etai)[,1]
@@ -164,25 +165,25 @@ betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglo
     c <- (trigamma(mu*phi)*mu-trigamma((1-mu)*phi)*(1-mu))*phi
     z <- (trigamma(mu*phi)*phi+trigamma((1-mu)*phi)*phi)/(gmu*gmu)
     d <- trigamma(mu*phi)*mu*mu + trigamma((1-mu)*phi)*(1-mu)*(1-mu)-as.numeric(trigamma(phi))
-    
+
     ub <- (t(x)%*%(t*(ye-mue)))*phi
     up <- 0
     for(i in 1:n){
       up <- up+mu[i]%*%(ye[i]-mue[i])+log(1-y[i])-digamma((1-mu[i])*phi)+digamma(phi)
     }
-    
+
     kbb <- as.numeric(phi)*t(x)%*%(as.numeric(z)*x)
     kbp <- t(x)%*%(t*c)
     kpp <- sum(d)
     km <- rbind(cbind(kbb,kbp),cbind(t(kbp),kpp))
-    
+
     param <- t(parami)+solve(km)%*%rbind(ub,up)
     b <- t(param)
     b[ncol(b)] <- ifelse(b[ncol(b)]<=0,.01,b[ncol(b)])
     mlike1 <- max_like(b)
     mlike2 <- max_like(parami)
     dif <- mlike1-mlike2
-    
+
     parami <- b
     betai <- parami[1:ncol(parami)-1]
     etai <- x%*%betai
@@ -196,14 +197,14 @@ betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglo
 
   kinv <- solve(km)
   dp <- sqrt(diag(kinv))
-  
+
   param <- xr
   beta <- param[1:ncol(x)]
   phi <- param[ncol(x)+1]
   eta <- x%*%beta
   mu <- linkf(eta)[,1]
   gmu <- linkf(eta)[,2]
-  
+
   tstat <- c(beta,phi)/dp
   probt <- 2*(1-pt(abs(tstat),n-k))
   vec <- cbind(c(beta,phi),dp)
@@ -216,14 +217,14 @@ betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglo
   lgamma2t <- lgamma((1-y)*phi)
   lgamma3t <- (phi*y-1)*log(y)
   lgamma4t <- ((1-y)*phi-1)*log(1-y)
-  
+
   lgamma1 <- lgamma(phi*mu)
   arg <- (1-mu)*phi;
   arg <- ifelse(arg<=0,1E-23,arg)
   lgamma2 <- lgamma((1-mu)*phi)
   lgamma3 <- (phi*mu-1)*log(y)
   lgamma4 <- ((1-mu)*phi-1)*log(1-y)
-  
+
   lnlmutil <- lgamma(phi)-lgamma1t-lgamma2t+lgamma3t+lgamma4t
   lnl <- lgamma(phi)-lgamma1-lgamma2+lgamma3+lgamma4
   resdeviance <- sign(y-mu)*sqrt(2*abs(lnlmutil-lnl))
@@ -292,10 +293,10 @@ betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglo
 
   sigmahatcl <- t(ecl)%*%ecl/n
   lnlcl <- -n*log(sigmahatcl)/2-n*log(2*acos(-1))/2-sum((y-yhatcl)*(y-yhatcl))/(2*sigmahatcl)
-  
+
   aicl <- 2*k-2*lnlcl
   aiccl <- aicl+2*k*(k+1)/(n-k-1)
-  
+
   res=data.frame(y,
                  yhatcl=as.vector(yhatcl),
                  ecl,
@@ -306,10 +307,10 @@ betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglo
                  resdeviance,
                  cookD=as.vector(cookD),
                  glbp=as.vector(ecl))
-  
+
   parameter_estimates=data.frame(cbind(vec,tstat,probt,c(oddsl,NA)), row.names = c("Intercept",colnames(x)[-1],"Phi"))
   names(parameter_estimates)=c("Estimate", "Std. Error", "t Value","Pr>|t|", "Odds Ratio")
-  
+
   result <- list(parameter_estimates=parameter_estimates,
                  phi=phi,
                  residuals=res,
@@ -319,6 +320,6 @@ betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglo
                  bp_test=data.frame('Statistic Value'=vecbp[1],'df'=round(vecbp[2]),'p-value'=vecbp[3]),
                  link_function=link,
                  n_iter=it-2)
-  
+
   return(result)
 }

@@ -25,7 +25,9 @@
 #'
 #' @examples
 #' data(saopaulo)
-#' output_list <- gss_gwbr(yvar = "prop_landline", xvar = c("prop_urb","prop_poor"), lat="y", long="x", data = saopaulo, method="fixed_g", type="cv", phi="local", globalmin=T, distancekm=T)
+#' output_list <- gss_gwbr(yvar = "prop_landline", xvar = c("prop_urb","prop_poor"),
+#' lat="y", long="x", data = saopaulo, method="fixed_g", type="cv", phi="local",
+#' globalmin=T, distancekm=T)
 #'
 #' ## Best bandwidth
 #' output_list$global_min

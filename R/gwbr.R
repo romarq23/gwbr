@@ -17,7 +17,7 @@
 #' @param maxint A maximum number of iterations to numerically maximize the log-likelihood function in search of the parameter estimates. The default is \code{maxint=100}.
 #'
 #' @return A list that contains:
-#' 
+#'
 #' \itemize{
 #' \item \code{parameter_estimates_qtls} - Parameter estimates quartiles and interquartile range.
 #' \item \code{parameter_estimates_desc} - Parameter estimates mean, minimum and maximum.
@@ -40,14 +40,15 @@
 #' \item \code{bandwidth} - Bandwidth used.
 #' \item \code{link_function} - The link function used in modeling.
 #' }
-#' 
+#'
 #' @examples
 #' data(saopaulo)
-#' output_list <- gwbr(yvar="prop_landline", xvar=c("prop_urb", "prop_poor"), lat="y", long="x", data=saopaulo, h=116.3647, method="fixed_g", link="logit")
-#' 
+#' output_list <- gwbr(yvar="prop_landline", xvar=c("prop_urb", "prop_poor"),
+#' lat="y", long="x", data=saopaulo, h=116.3647, method="fixed_g", link="logit")
+#'
 #' ## Descriptive statistics of the parameter estimates
 #' output_list$parameter_estimates_desc
-#' 
+#'
 #' ## Table with all parameter estimates and your respective statistics
 #' output_list$parameters
 #' @export
@@ -60,15 +61,15 @@ if(global==T){
       print("ERROR: 'h' must be numeric and greater than 0")
       stop()
     }
-    
+
     y=as.matrix(data[,yvar])
     x=as.matrix(data[,xvar])
-    
+
     if(!is.na(xglobal)){
       xf=data[,xglobal]
       nf=ncol(xf)
     }
-    
+
     n=length(y)
     x=cbind(matrix(1,n,1),x)
     for(i in 1:n){
@@ -78,16 +79,16 @@ if(global==T){
     }
     yhat=matrix(0,n,1)
     k=ncol(x)
-    
+
     if(length(link)==4){
       link=c("logit")
     }
-    
+
     if(length(link)>1){
       print('ERROR: Link Function should be one of logit, loglog, cloglog or probit.')
       stop()
     }
-    
+
     if(toupper(link)=="LOGIT"){
       yc=log(y/(1-y))
       linkf=function(eta){
@@ -101,7 +102,7 @@ if(global==T){
         return(links)
       }
     }
-    
+
     if(toupper(link)=="PROBIT"){
       yc=qnorm(y)
       linkf=function(eta){
@@ -112,7 +113,7 @@ if(global==T){
         return(links)
       }
     }
-    
+
     if(toupper(link)=="LOGLOG"){
       yc=-log(-log(y))
       linkf=function(eta){
@@ -124,7 +125,7 @@ if(global==T){
         return(links)
       }
     }
-    
+
     if(toupper(link)=="CLOGLOG"){
       yc=log(-log(1-y))
       linkf=function(eta){
@@ -136,7 +137,7 @@ if(global==T){
         return(links)
       }
     }
-    
+
     if(sum(toupper(link)==c("LOGIT", "PROBIT", "PROBIT", "LOGLOG", "CLOGLOG"))==0){
       print('ERROR: Link Function should be one of logit, loglog, cloglog or probit.')
     }
@@ -145,28 +146,28 @@ if(global==T){
       print('ERROR: Method should be one of fixed_g, fixed_bsq or adaptive_bsq.')
       stop()
     }
-    
+
     if(length(method)==3){
       link=c("fixed_g")
     }
-    
+
     if(length(method)>1){
       print('ERROR: Method should be one of fixed_g, fixed_bsq or adaptive_bsq.')
       stop()
     }
-    
+
     coord=cbind(data[,long],data[,lat])
-    
+
     if(nrow(grid)==0){
       points=cbind(data[,long],data[,lat])
     }else{
       points=cbind(grid[,long],grid[,lat])
     }
-    
+
     m=nrow(points)
     dist_ <- as.matrix(dist(coord))
     seq=as.matrix(1:n)
-    
+
     bi=matrix(0,ncol(x)*m,4)
     rsqri=matrix(0,m,1)
     sumwi=matrix(0,m,1)
@@ -178,9 +179,9 @@ if(global==T){
     s2=matrix(0,m,1)
     bit=matrix(0,m,ncol(x)+1)
     ss=matrix(0,m,1)
-    
+
     rnd=1
-    
+
     for(i in 1:m){
       seqi=matrix(i,n,1)
       dist=cbind(seqi,seq,as.matrix(dist_[,i]))
@@ -230,16 +231,16 @@ if(global==T){
       ss[i]=(x[i,]%*%solve(t(x)%*%as.matrix(w*x))%*%t(x))[1]
     }
     e=yc-yhat
-    
+
     betai_=matrix(t(bi[,1:2]),m, byrow = T)
     i=seq(2,ncol(betai_),2)
     betai_=betai_[,i]
-    
+
     eta=as.matrix(x)%*%t(betai_)
-    
+
     mu=linkf(eta)[,1:m]
     gmu=linkf(eta)[,(m+1):(2*m)]
-    
+
     sigma2=as.numeric(t(e)%*%e)/((n-sum(ss))*(gmu*gmu))
     phi=matrix(0,1*m,1)
     for(i in 1:m){
@@ -249,7 +250,7 @@ if(global==T){
     }
     phi=ifelse(phi<1,phi,phi-1)
     parameters=cbind(betai_,phi)
-    
+
     max_like=function(param){
       betai2=t(param[1:length(param)-1])
       phii2=param[length(param)]
@@ -267,7 +268,7 @@ if(global==T){
       }
       return(lnl)
     }
-    
+
     beta=matrix(0,m,ncol(x)+3)
     yhat=matrix(0,m,1)
     iteration=matrix(0,m,1)
@@ -276,7 +277,7 @@ if(global==T){
     stdphi=matrix(0,m,1)
     w1=matrix(0,m,m)
     bb=matrix(0,ncol(x)*n,n)
-    
+
     for(i in 1:m){
       seqi=matrix(i,n,1)
       dist=cbind(seqi,seq,as.matrix(dist_[,i]))
@@ -315,7 +316,7 @@ if(global==T){
       optn=matrix(1)
       con=rbind(cbind(matrix(NA,1,k),.01),matrix(NA,1,k+1))
       it=0
-      
+
       dif=1
       parami[length(parami)]=ifelse(parami[length(parami)]<=0,.01,parami[length(parami)])
       betai=t(parami[1:length(parami)-1])
@@ -335,21 +336,21 @@ if(global==T){
           c=phii*(trigamma(mu*phii)*mu - trigamma((1-mu)*phii)*(1-mu))
           z=(phii*trigamma(mu*phii)+phii*trigamma((1-mu)*phii))/(gmu*gmu)
           d=w*(trigamma(mu*phii)*mu*mu + trigamma((1-mu)*phii)*(1-mu)*(1-mu)-trigamma(phii))
-          
+
           w=as.vector(w)
-          
+
           ub= phii*(t((x*w))%*%(t*(ye-mue)))
           up=0
           for(ii in 1:length(mu)){
             up=up+(mu[ii]*(ye[ii]-mue[ii])+log(1-y[ii])-digamma((1-mu[ii])%*%phii)+digamma(phii))*w[ii]
           }
           z=as.vector(z)
-          
+
           kbb=phii*t(x)%*%as.matrix(x*w*z)
           kbp=t(x*w)%*%(t*c)
           kpp=sum(d)
           km=rbind(cbind(kbb,kbp),cbind(t(kbp),kpp))
-          
+
           if(det(km)>0){
             paramf=t(parami)+solve(km, tol=0)%*%rbind(ub,up)
           }else{
@@ -360,7 +361,7 @@ if(global==T){
           mlike1=max_like(b)
           mlike2=max_like(parami)
           dif=mlike1-mlike2
-          
+
           parami=b
           betai=t(parami[1:length(parami)-1])
           phii=parami[length(parami)]
@@ -377,22 +378,22 @@ if(global==T){
       iteration[i]=it
       phi[i]=xr[ncol(xr)]
       s_[i,]=(x[i,]%*%solve(t(x)%*%as.matrix(x*w*z))%*%t(x*w*z))
-      
+
       w1[,i]=w
     }
     vv2=sum(diag(t(s_)%*%s_))
     vv1=sum(diag(s_))
-    
+
     v1=sum(s)
     v1=2*vv1-vv2
 
     mu=linkf(yhat)[,1]
     gmu=linkf(yhat)[,2]
-    
+
     t=1/gmu
     c=phi*(trigamma(mu*phi)*mu - trigamma((1-mu)*phi)*(1-mu))
     z=(phi*trigamma(mu*phi)+phi*trigamma((1-mu)*phi))/(gmu*gmu)
-    
+
     for(i in 1:m){
       d=w1[,i]*(trigamma(mu*phi)*mu*mu + trigamma((1-mu)*phi)*(1-mu)*(1-mu)-trigamma(phi))
       kbb=(t(as.vector(phi)*x)%*%as.matrix(x*as.vector(z)*w1[,i]))
@@ -408,7 +409,7 @@ if(global==T){
       stdb[i,]=t(dp[1:ncol(x)])
       stdphi[i]=dp[length(dp)]
     }
-    
+
     if(!is.na(xglobal)){
       if(toupper(link)=="LOGIT"){yc <- log(y/(1-y))}else{
         if(toupper(link)=="CLOGLOG"){yc <- log(-log(1-y))}else{
@@ -418,25 +419,25 @@ if(global==T){
         }
       }
       yc <- as.matrix(yc)
-      
+
       is=diag(n)-s_
       bf=solve(t(xf)%*%t(is)%*%is%*%xf)%*%t(xf)%*%t(is)%*%is%*%yc
       ef=is%*%yc-(is%*%xf)%*%bf
-      
+
       is2=t(is)%*%is
       etai=is%*%xf%*%bf
       mu=linkf(etai)[,1]
       gmu=linkf(etai)[,2]
       sigma2=as.numeric(t(ef)%*%ef)/((n-k)*(gmu*gmu))
-      
+
       global_phi=0
       for(i in 1:n){
         global_phi=global_phi+mu[i]%*%(1-mu[i])/(sigma2[i]%*%n)
       }
       global_phi=ifelse(global_phi<1,global_phi,global_phi-1)
-      
+
       param=rbind(bf,global_phi)
-      
+
       max_likegf <- function(param){
         it=it+1
         beta=param[1:ncol(param)-1]
@@ -458,11 +459,11 @@ if(global==T){
       }
       param=rbind(bf,global_phi)
       it=0
-      
+
       parami=t(rbind(bf,global_phi))
       dif=1
       etai=is%*%xf%*%bf
-      
+
       while(abs(dif)>0.00000001 & it<maxint){
         mu=linkf(etai)[,1]
         gmu= linkf(etai)[,2]
@@ -472,8 +473,8 @@ if(global==T){
         c=t(global_phi%*%(as.numeric(trigamma(mu%*%global_phi))*mu - as.numeric(trigamma((1-mu)%*%global_phi))*(1-mu)))
         z=(as.numeric(global_phi)*trigamma(mu%*%global_phi)+as.numeric(global_phi)*trigamma((1-mu)%*%global_phi))/(gmu*gmu)
         d=as.numeric(trigamma(mu%*%global_phi))*mu*mu + as.numeric(trigamma((1-mu)%*%global_phi))*(1-mu)*(1-mu)-as.numeric(trigamma(global_phi))
-        
-        
+
+
         ub=global_phi%*%(t(xf)%*%t(is)%*%(t*(ye-as.numeric(mue))))
         up=0
         for(i in 1:n){
@@ -483,14 +484,14 @@ if(global==T){
         kbp=t(xf)%*%t(is)%*%(t*c)
         kpp=sum(d)
         km=rbind(cbind(kbb,kbp),cbind(t(kbp),kpp))
-        
+
         param=t(parami)+solve(km, tol=0)%*%rbind(ub,up)
         b=t(param)
         b[ncol(b)]=ifelse(b[ncol(b)]<=0,.01,b[ncol(b)])
         mlike1=max_likegf(b)
         mlike2=max_likegf(parami)
         dif=mlike1-mlike2
-        
+
         parami=b
         betai=parami[1:ncol(parami)-1]
         etai=is%*%xf%*%betai
@@ -500,14 +501,14 @@ if(global==T){
       }
       bf=xr[1]
       phif=xr[2]
-      
+
       global_tab=data.frame(xglobal,bf,phif)
-      
+
       rnd_=2
     }
-    
+
     res=y-mu
-    
+
     beta_=cbind(beta[,1:ncol(x)],phi)
     qntl=sapply(as.data.frame(beta_), function(x) quantile(x, probs = c(.25,.5,.75), type = 2))
     qntl=rbind(qntl,(qntl[3,]-qntl[1,]))
@@ -517,7 +518,7 @@ if(global==T){
     rownames(qntl)=c("P25", "P50", "P75", "IQR")
     rownames(descriptb)=c("Mean", "Min", "Max")
     colnames(qntl)=colnames(descriptb)=c("Intercept", xvar, "Phi")
-    
+
     stdbeta_=cbind(stdb,stdphi)
     qntls=sapply(as.data.frame(stdbeta_), function(x) quantile(x, probs = c(.25,.5,.75), type = 2))
     qntls=rbind(qntls,(qntls[3,]-qntls[1,]))
@@ -527,7 +528,7 @@ if(global==T){
     rownames(qntls)=c("P25", "P50", "P75", "IQR")
     rownames(descripts)=c("Mean", "Min", "Max")
     colnames(qntls)=colnames(descripts)=c("Intercept", xvar, "Phi")
-    
+
     tstat=beta[,1:ncol(x)]/stdb
     probt=2*(1-pt(abs(tstat),m-k))
     tstatp=phi/stdphi
@@ -543,7 +544,7 @@ if(global==T){
                colname1_,
                t(paste0(label_, matrix(t(colname1_),ncol(x)))),
                c("phi", "std_phi", "tstat_phi", "probt_phi"))
-    
+
 
     lgamma1t=lgamma(phi*y)
     arg=(1-y)*phi
@@ -551,21 +552,21 @@ if(global==T){
     lgamma2t=lgamma((1-y)*phi)
     lgamma3t=(phi*y-1)*log(y)
     lgamma4t=((1-y)*phi-1)*log(1-y)
-    
+
     lgamma1=lgamma(phi*mu)
     arg=(1-mu)*phi
     arg=ifelse(arg<=0,1E-23,arg)
     lgamma2=lgamma((1-mu)*phi)
     lgamma3=(phi*mu-1)*log(y)
     lgamma4=((1-mu)*phi-1)*log(1-y)
-    
+
     lnlmutil=lgamma(phi)-lgamma1t-lgamma2t+lgamma3t+lgamma4t
     lnl= lgamma(phi)-lgamma1-lgamma2+lgamma3+lgamma4
     resdeviance=sign(y-mu)*sqrt(2*abs(lnlmutil-lnl))
-    
+
     vary=mu*(1-mu)/(1+phi)
     resstd=(y-mu)/sqrt(vary)
-    
+
     ye=log(y/(1-y))
     mue=digamma(mu*phi)-digamma((1-mu)*phi)
     m=1/(y*(1-y))
@@ -576,16 +577,16 @@ if(global==T){
     b=-(y-mu)/(y*(1-y))
     glb=as.matrix(t*x)%*%solve(t(x)%*%as.matrix(as.vector(q)*x))%*%t(x*t*as.vector(m))
     glbp=diag(glb+((1/as.vector(as.numeric(g)*phi))*(t*as.matrix(x)%*%solve(t(x)%*%as.matrix(as.vector(q)*x))%*%t(x)%*%(t*f)%*%((t(f)*t(t))%*%as.matrix(x)%*%solve(t(x)%*%as.matrix(as.vector(q)*x))%*%t(x*t*as.vector(m))-t(b)))))
-    
+
     z=as.vector(z)
-    H=diag(as.matrix(sqrt(z)*x)%*%solve(t(x)%*%as.matrix(z*x))%*%t(x*sqrt(z))) 
+    H=diag(as.matrix(sqrt(z)*x)%*%solve(t(x)%*%as.matrix(z*x))%*%t(x*sqrt(z)))
     cookD=H*(resstd*resstd)/(k*(1-H)*(1-H))
-    
+
     eta=yhat
     mat=cbind(eta,yc)
     pseudor2=(cor(mat)%*%t(cor(mat)) -1)[1,1]
     adjpr2=1-((n-1)/(n-v1))*(1-pseudor2)
-    
+
     sseb=t(res)%*%res
     gbp=matrix(0,n,1)
     fbp=sseb/n
@@ -596,15 +597,15 @@ if(global==T){
     lm=.5*t(gbp)%*%as.matrix(x)%*%solve(t(x)%*%as.matrix(x))%*%t(x)%*%gbp
     probbp=(1-pchisq(abs(lm),k-1))
     vecbp=cbind(lm,k-1,probbp)
-    
+
     AIC= 2*(v1) - 2*sum(lnl)
     AICC=AIC+2*(v1)*(v1+1)/(n-v1-1)
-    
+
     yhat=mu
     res_=data.frame(y,yhat,eta,res,resstd,resdeviance,cookD,glbp,iteration)
     parameters2_=data.frame(bistdt_)
     names(parameters2_)=colname_
-    
+
     sig_=matrix("not significant at 90%",n,ncol(x))
     for(i in 1:n){
       for(j in 1:ncol(x)){
@@ -623,7 +624,7 @@ if(global==T){
         }
       }
     }
-    
+
     sigp_=matrix("not significant at 90%",n,1)
     for(i in 1:n){
       if(probtp[i]<0.01*((ncol(x))/v1)){
@@ -640,17 +641,17 @@ if(global==T){
         }
       }
     }
-    
+
     sig_=as.data.frame(cbind(sig_,sigp_))
     names(sig_)=c(paste0("sig_",c(colname1_,"Phi")))
-    
+
     if(!is.na(xglobal)){
       global_par=rbind(xglobal,bf)
     }else{
       global_par=global_phi=global_tab=c("There's no global parameters in the model")
-      
+
     }
-    
+
     result <- list(parameter_estimates_qtls=as.data.frame(qntl),
                    parameter_estimates_desc=as.data.frame(descriptb),
                    std_qtls=as.data.frame(qntls),
@@ -672,7 +673,7 @@ if(global==T){
                    significance=sig_,
                    bandwidth=as.numeric(h),
                    link_function=as.character(link))
-    
+
 }
 return(result)
 }
