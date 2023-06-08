@@ -1,0 +1,11 @@
+Package: gwbr
+Title: Local and Global Beta Regression
+Version: 1.0.1
+Authors@R: c(
+	person("Roberto", "Marques", ,"robertomarques_23@yahoo.com.br", role = c("aut", "cre")),
+	person("Alan", "da Silva", email = "alansilva@unb.br", role = "aut"))
+Description: Functions to fit global or local beta regression.
+License: GPL-3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
