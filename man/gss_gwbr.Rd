@@ -13,7 +13,6 @@ gss_gwbr(
   method = c("fixed_g", "fixed_bsq", "adaptive_bsq"),
   link = c("logit", "probit", "loglog", "cloglog"),
   type = c("cv", "aic"),
-  phi = "local",
   globalmin = T,
   distancekm = T,
   maxint = 100
@@ -36,8 +35,6 @@ gss_gwbr(
 
 \item{type}{Can be \code{"cv"}, when the Cross-Validation function is used to estimate the bandwidth or \code{"aic"}, when the AIC function is used. The default is \code{"cv"}.}
 
-\item{phi}{Can be \code{"local"}, when the scale parameter occurs differently in different locations or \code{"global"}, when the scale parameter is the same for all locales. The default is \code{"local"}.}
-
 \item{globalmin}{Logical. If \code{TRUE} search for the global minimum. The default is \code{TRUE}.}
 
 \item{distancekm}{Logical. If \code{TRUE} use the distance in kilometers otherwise, use the Euclidean distance. The default is \code{TRUE}.}
@@ -57,9 +54,11 @@ A list that contains:
 The Golden Section Search (GSS) algorithm is used in searching for the best bandwidth for geographically weighted regression. For more details see Da Silva and Mendes (2018).
 }
 \examples{
+\dontrun{
 data(saopaulo)
-output_list <- gss_gwbr(yvar = "prop_landline", xvar = c("prop_urb","prop_poor"), lat="y", long="x", data = saopaulo, method="fixed_g", type="cv", phi="local", globalmin=T, distancekm=T)
+output_list=gss_gwbr("prop_landline",c("prop_urb","prop_poor"),"y","x",saopaulo,"fixed_g")
 
 ## Best bandwidth
 output_list$global_min
+}
 }

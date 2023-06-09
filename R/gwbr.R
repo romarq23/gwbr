@@ -42,15 +42,16 @@
 #' }
 #'
 #' @examples
+#' \dontrun{
 #' data(saopaulo)
-#' output_list <- gwbr(yvar="prop_landline", xvar=c("prop_urb", "prop_poor"),
-#' lat="y", long="x", data=saopaulo, h=116.3647, method="fixed_g", link="logit")
+#' output_list=gwbr("prop_landline",c("prop_urb", "prop_poor"),"y","x",116.3647,saopaulo)
 #'
 #' ## Descriptive statistics of the parameter estimates
 #' output_list$parameter_estimates_desc
 #'
 #' ## Table with all parameter estimates and your respective statistics
 #' output_list$parameters
+#' }
 #' @export
 
 gwbr <- function(yvar, xvar, lat, long, h, data, xglobal=NA_character_, grid=data.frame(), method=c("fixed_g", "fixed_bsq", "adaptative_bsq"), link=c("logit", "probit", "loglog", "cloglog"), distancekm=T, global=F, maxint=100){
@@ -142,13 +143,13 @@ if(global==T){
       print('ERROR: Link Function should be one of logit, loglog, cloglog or probit.')
     }
 
+    if(length(method)==3){
+      method=c("fixed_g")
+    }
+
     if(sum(toupper(method)==c("FIXED_G", "FIXED_BSQ", "ADAPTIVE_BSQ"))==0){
       print('ERROR: Method should be one of fixed_g, fixed_bsq or adaptive_bsq.')
       stop()
-    }
-
-    if(length(method)==3){
-      link=c("fixed_g")
     }
 
     if(length(method)>1){

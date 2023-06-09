@@ -77,12 +77,14 @@ A list that contains:
 Fits a local regression model for each location using the beta distribution, recommended for rates and proportions, using a parametrization with mean (transformed by the link function) and precision parameter (called phi). For more details see Da Silva and Lima (2017).
 }
 \examples{
+\dontrun{
 data(saopaulo)
-output_list <- gwbr(yvar="prop_landline", xvar=c("prop_urb", "prop_poor"), lat="y", long="x", data=saopaulo, h=116.3647, method="fixed_g", link="logit")
+output_list=gwbr("prop_landline",c("prop_urb", "prop_poor"),"y","x",116.3647,saopaulo)
 
 ## Descriptive statistics of the parameter estimates
 output_list$parameter_estimates_desc
 
 ## Table with all parameter estimates and your respective statistics
 output_list$parameters
+}
 }

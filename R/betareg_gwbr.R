@@ -23,9 +23,9 @@
 #' }
 #'
 #' @examples
+#' \dontrun{
 #' data(saopaulo)
-#' output_list <- betareg_gwbr("prop_landline", c("prop_purb","prop_poor"),
-#' data = saopaulo, link = "logit")
+#' output_list=betareg_gwbr("prop_landline",c("prop_urb","prop_poor"),saopaulo)
 #'
 #' ## Parameters
 #' output_list$parameter_estimates
@@ -33,6 +33,7 @@
 #' ## R2 and AICc
 #' output_list$r2
 #' output_list$aicc
+#' }
 #' @export
 
 betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglog"), maxint=100){

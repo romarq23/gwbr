@@ -10,7 +10,6 @@
 #' @param method Kernel function used to set bandwidth parameter. The options are: \code{"fixed_g"}, \code{"fixed_bsq"} or \code{"adaptive_bsq"}. The default is \code{"fixed_g"}.
 #' @param link The link function used in modeling. The options are: \code{"logit"}, \code{"probit"}, \code{"loglog"} or \code{"cloglog"}. The default is \code{"logit"}.
 #' @param type Can be \code{"cv"}, when the Cross-Validation function is used to estimate the bandwidth or \code{"aic"}, when the AIC function is used. The default is \code{"cv"}.
-#' @param phi Can be \code{"local"}, when the scale parameter occurs differently in different locations or \code{"global"}, when the scale parameter is the same for all locales. The default is \code{"local"}.
 #' @param globalmin Logical. If \code{TRUE} search for the global minimum. The default is \code{TRUE}.
 #' @param distancekm Logical. If \code{TRUE} use the distance in kilometers otherwise, use the Euclidean distance. The default is \code{TRUE}.
 #' @param maxint A maximum number of iterations to numerically maximize the log-likelihood function in search of parameter estimates. The default is \code{maxint=100}.
@@ -24,16 +23,16 @@
 #' }
 #'
 #' @examples
+#' \dontrun{
 #' data(saopaulo)
-#' output_list <- gss_gwbr(yvar = "prop_landline", xvar = c("prop_urb","prop_poor"),
-#' lat="y", long="x", data = saopaulo, method="fixed_g", type="cv", phi="local",
-#' globalmin=T, distancekm=T)
+#' output_list=gss_gwbr("prop_landline",c("prop_urb","prop_poor"),"y","x",saopaulo,"fixed_g")
 #'
 #' ## Best bandwidth
 #' output_list$global_min
+#' }
 #' @export
 
-gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq", "adaptive_bsq"), link=c("logit", "probit", "loglog", "cloglog"), type=c("cv", "aic"), phi="local", globalmin=T, distancekm=T, maxint=100){
+gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq", "adaptive_bsq"), link=c("logit", "probit", "loglog", "cloglog"), type=c("cv", "aic"), globalmin=T, distancekm=T, maxint=100){
 
   y=as.matrix(data[,yvar])
   x=as.matrix(data[,xvar])
@@ -44,7 +43,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
   yhat=matrix(0,n,1)
   ss=matrix(0,n,1)
 
-  PHI=phi
+  PHI="local"
 
   for(i in 1:n){
     if(y[i]>=0.99999 | y[i]<=0.00001){
@@ -115,13 +114,13 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
     stop()
   }
 
+  if(length(method)==3){
+    method=c("fixed_g")
+  }
+
   if(sum(toupper(method)==c("FIXED_G", "FIXED_BSQ", "ADAPTIVE_BSQ"))==0){
     print('ERROR: Method should be one of FIXED_G, FIXED_BSQ or ADAPTIVE_BSQ.')
     stop()
-  }
-
-  if(length(method)==3){
-    link=c("fixed_g")
   }
 
   if(length(method)>1){
@@ -246,9 +245,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
             w[jj]=exp(-0.5*(dist[jj,3]/h)**2)
             w[i]=0
           }
-          if(toupper(PHI)=="GLOBAL"){
-            parameters=cbind(betai_, matrix(phifixo, n, 1))
-          }
+
           parami=t(parameters[i,])
           it=0
           dif=1
@@ -289,11 +286,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
                 paramf=parami
               }
               b=t(paramf)
-              if(toupper(PHI)=="GLOBAL"){
-                b[ncol(b)]=phifixo
-              }else{
-                b[ncol(b)]=ifelse(b[ncol(b)]<=0,.01,b[ncol(b)])
-              }
+              b[ncol(b)]=ifelse(b[ncol(b)]<=0,.01,b[ncol(b)])
               mlike1=max_like(b)
               mlike2=max_like(parami)
               dif=mlike1-mlike2
@@ -546,9 +539,6 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
             x1=rbind(x1,x[dist[jj,2],])
             y1=rbind(y1,y[dist[jj,2],])
           }
-          if(toupper(PHI)=="GLOBAL"){
-            parameters=cbind(betai_, matrix(phifixo, n, 1))
-          }
           parami=t(parameters[i,])
           it=0
           dif=1
@@ -590,11 +580,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
                 paramf=parami
               }
               b=t(paramf)
-              if(toupper(PHI)=="GLOBAL"){
-                b[ncol(b)]=phifixo
-              }else{
-                b[ncol(b)]=ifelse(b[ncol(b)]<=0,.01,b[ncol(b)])
-              }
+              b[ncol(b)]=ifelse(b[ncol(b)]<=0,.01,b[ncol(b)])
               mlike1=max_like(b)
               mlike2=max_like(parami)
               dif=mlike1-mlike2
@@ -783,10 +769,6 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
         }
         position=which(dist[,3]>h)
         w[position]=0
-
-        if(toupper(PHI)=="GLOBAL"){
-          parameters=cbind(betai_, matrix(phifixo, n, 1))
-        }
         parami=t(parameters[i,])
         it=0
         dif=1
@@ -827,11 +809,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
               paramf=parami
             }
             b=t(paramf)
-            if(toupper(PHI)=="GLOBAL"){
-              b[ncol(b)]=phifixo
-            }else{
-              b[ncol(b)]=ifelse(b[ncol(b)]<=0,.01,b[ncol(b)])
-            }
+            b[ncol(b)]=ifelse(b[ncol(b)]<=0,.01,b[ncol(b)])
             mlike1=max_like(b)
             mlike2=max_like(parami)
             dif=mlike1-mlike2
@@ -1053,9 +1031,6 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
 
           w=w[order(w[,2]),]
           w=w[,1]
-          if(toupper(PHI)=="GLOBAL"){
-            parameters=cbind(betai_, matrix(phifixo, n, 1))
-          }
           parami=t(parameters[i,])
           it=0
           dif=1
@@ -1096,11 +1071,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
                 paramf=parami
               }
               b=t(paramf)
-              if(toupper(PHI)=="GLOBAL"){
-                b[ncol(b)]=phifixo
-              }else{
-                b[ncol(b)]=ifelse(b[ncol(b)]<=0,.01,b[ncol(b)])
-              }
+              b[ncol(b)]=ifelse(b[ncol(b)]<=0,.01,b[ncol(b)])
               mlike1=max_like(b)
               mlike2=max_like(parami)
               dif=mlike1-mlike2
@@ -1415,9 +1386,6 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
 
           x1=rbind(x1,x[position,])
           y1=c(y1,y[position,])
-          if(toupper(PHI)=="GLOBAL"){
-            parameters=cbind(betai_, matrix(phifixo, n, 1))
-          }
           parami=t(parameters[i,])
           it=0
           dif=1
@@ -1460,11 +1428,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
                 paramf=parami
               }
               b=t(paramf)
-              if(toupper(PHI)=="GLOBAL"){
-                b[ncol(b)]=phifixo
-              }else{
-                b[ncol(b)]=ifelse(b[ncol(b)]<=0,.01,b[ncol(b)])
-              }
+              b[ncol(b)]=ifelse(b[ncol(b)]<=0,.01,b[ncol(b)])
               mlike1=max_like(b)
               mlike2=max_like(parami)
               dif=mlike1-mlike2
