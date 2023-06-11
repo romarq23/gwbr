@@ -4,7 +4,7 @@ Version: 1.0.4
 Authors@R: c(
 	person("Roberto", "Marques", ,"robertomarques_23@yahoo.com.br", role = c("aut", "cre")),
 	person("Alan", "da Silva", email = "alansilva@unb.br", role = "aut"))
-Description: Fit a regression model for when the response variable is presented as a ratio or proportion. This adjustment can occur globally, with the same estimate for the entire study space, or locally, where a beta regression model is fitted for each region, considering only influential locations for that area. Da Silva, A. R. and Lima, A. O. (2017) <doi:https://doi.org/10.1016/j.spasta.2017.07.011>
+Description: Fit a regression model for when the response variable is presented as a ratio or proportion. This adjustment can occur globally, with the same estimate for the entire study space, or locally, where a beta regression model is fitted for each region, considering only influential locations for that area. Da Silva, A. R. and Lima, A. O. (2017) <doi:10.1016/j.spasta.2017.07.011>.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
