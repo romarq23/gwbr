@@ -23,7 +23,7 @@
 #' }
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data(saopaulo)
 #' output_list=gss_gwbr("prop_landline",c("prop_urb","prop_poor"),"y","x",saopaulo,"fixed_g")
 #'
@@ -32,7 +32,7 @@
 #' }
 #' @export
 
-gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq", "adaptive_bsq"), link=c("logit", "probit", "loglog", "cloglog"), type=c("cv", "aic"), globalmin=T, distancekm=T, maxint=100){
+gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq", "adaptive_bsq"), link=c("logit", "probit", "loglog", "cloglog"), type=c("cv", "aic"), globalmin=TRUE, distancekm=TRUE, maxint=100){
 
   y=as.matrix(data[,yvar])
   x=as.matrix(data[,xvar])
@@ -56,7 +56,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
   }
 
   if(length(link)>1){
-    print('ERROR: Link Function should be one of logit, loglog, cloglog or probit.')
+    message('ERROR: Link Function should be one of logit, loglog, cloglog or probit.')
     stop()
   }
 
@@ -110,7 +110,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
   }
 
   if(sum(toupper(link)==c("LOGIT", "PROBIT", "LOGLOG", "CLOGLOG"))==0){
-    print('ERROR: Link Function should be one of LOGIT, LOGLOG, CLOGLOG or PROBIT.')
+    message('ERROR: Link Function should be one of LOGIT, LOGLOG, CLOGLOG or PROBIT.')
     stop()
   }
 
@@ -119,12 +119,12 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
   }
 
   if(sum(toupper(method)==c("FIXED_G", "FIXED_BSQ", "ADAPTIVE_BSQ"))==0){
-    print('ERROR: Method should be one of FIXED_G, FIXED_BSQ or ADAPTIVE_BSQ.')
+    message('ERROR: Method should be one of FIXED_G, FIXED_BSQ or ADAPTIVE_BSQ.')
     stop()
   }
 
   if(length(method)>1){
-    print('ERROR: Method should be one of fixed_g, fixed_bsq or adaptive_bsq.')
+    message('ERROR: Method should be one of fixed_g, fixed_bsq or adaptive_bsq.')
     stop()
   }
 
@@ -133,7 +133,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
   }
 
   if(sum(toupper(type)==c("CV", "AIC"))==0){
-    print('ERROR: Type should be one of CV or AIC.')
+    message('ERROR: Type should be one of CV or AIC.')
     stop()
   }
 
@@ -165,7 +165,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
     if(toupper(type)=="CV"){
       ax=0
       bx=trunc(max(dist_)+1)
-      if(distancekm==T){
+      if(distancekm==TRUE){
         bx=bx*111
       }
 
@@ -180,7 +180,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
       for(i in 1:n){
         seqi=matrix(i,n,1)
         dist=cbind(seqi,seq,dist_[,i])
-        if(distancekm==T){
+        if(distancekm==TRUE){
           dist[,3]=dist[,3]*111
         }
         u=nrow(dist)
@@ -235,7 +235,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
         for(i in 1:n){
           seqi=matrix(i,n,1)
           dist=cbind(seqi,seq,dist_[,i])
-          if(distancekm==T){
+          if(distancekm==TRUE){
             dist[,3]=dist[,3]*111
           }
           u=nrow(dist)
@@ -314,13 +314,13 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
 
       ax=0
       bx=trunc(max(dist_)+1)
-      if(distancekm==T){
+      if(distancekm==TRUE){
         bx=bx*111
       }
       r=0.61803399
       tol=0.1
 
-      if(globalmin==F){
+      if(globalmin==FALSE){
         lower=ax
         upper=bx
         xmin=matrix(0,1,2)
@@ -384,7 +384,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
       }
 
       colnames(min_bandwidth_)=c('golden', 'bandwidth')
-      if(globalmin==T){
+      if(globalmin==TRUE){
         h=xmin[which.min(xmin[,1]),2]
       }else{
         h=xmin[,2]
@@ -422,7 +422,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
         d=matrix(0,1,3)
         dist=d
         for(j in 1:n){
-          if(distancekm==T){
+          if(distancekm==TRUE){
             dif=abs(coord[i,1]-coord[j,1])
             raio=acos(-1)/180
             argument=sin(coord[i,2]*raio)*sin(coord[j,2]*raio)+cos(coord[i,2]*raio)*cos(coord[j,2]*raio)*cos(dif*raio)
@@ -439,7 +439,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
           if(d1!=0){
             d[1]=i
             d[2]=j
-            if(distancekm==T){
+            if(distancekm==TRUE){
               d[3]=arco*6371
             }else{
               d[3]=sqrt((coord[i,1]-coord[j,1])**2+(coord[i,2]-coord[j,2])**2)
@@ -505,7 +505,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
           d=matrix(0,1,3)
           dist=d
           for(j in 1:n){
-            if(distancekm==T){
+            if(distancekm==TRUE){
               dif=abs(coord[i,1]-coord[j,1])
               raio=acos(-1)/180
               argument=sin(coord[i,2]*raio)*sin(coord[j,2]*raio)+cos(coord[i,2]*raio)*cos(coord[j,2]*raio)*cos(dif*raio)
@@ -522,7 +522,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
             if(d1!=0){
               d[1]=i
               d[2]=j
-              if(distancekm==T){
+              if(distancekm==TRUE){
                 d[3]=arco*6371
               }else{
                 d[3]=sqrt((coord[i,1]-coord[j,1])**2+(coord[i,2]-coord[j,2])**2)
@@ -685,7 +685,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
     type="CV"
     ax=0
     bx=trunc(max(dist_)+1)
-    if(distancekm==T){
+    if(distancekm==TRUE){
       bx=bx*111
     }
 
@@ -700,7 +700,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
     for(i in 1:n){
       seqi=matrix(i,n,1)
       dist=cbind(seqi,seq,dist_[,i])
-      if(distancekm==T){
+      if(distancekm==TRUE){
         dist[,3]=dist[,3]*111
       }
       u=nrow(dist)
@@ -758,7 +758,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
       for(i in 1:n){
         seqi=matrix(i,n,1)
         dist=cbind(seqi,seq,dist_[,i])
-        if(distancekm==T){
+        if(distancekm==TRUE){
           dist[,3]=dist[,3]*111
         }
         u=nrow(dist)
@@ -837,13 +837,13 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
 
     ax=0
     bx=trunc(max(dist_)+1)
-    if(distancekm==T){
+    if(distancekm==TRUE){
       bx=bx*111
     }
     r=0.61803399
     tol=0.1
 
-    if(globalmin==F){
+    if(globalmin==FALSE){
       lower=ax
       upper=bx
       xmin=matrix(0,1,2)
@@ -907,7 +907,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
     }
 
     colnames(min_bandwidth_)=c('golden', 'bandwidth')
-    if(globalmin==T){
+    if(globalmin==TRUE){
       h=xmin[which.min(xmin[,1]),2]
     }else{
       h=xmin[,2]
@@ -933,7 +933,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
       for(i in 1:n){
         seqi=matrix(i,n,1)
         dist=cbind(seqi,seq,dist_[,i])
-        if(distancekm==T){
+        if(distancekm==TRUE){
           dist[,3]=dist[,3]*111
         }
         u=nrow(dist)
@@ -1004,7 +1004,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
           seqi=matrix(i,n,1)
           dist=cbind(seqi,seq,dist_[,i])
 
-          if(distancekm==T){
+          if(distancekm==TRUE){
             dist[,3]=dist[,3]*111
           }
           u=nrow(dist)
@@ -1104,7 +1104,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
       r=0.61803399
       tol=0.1
 
-      if(globalmin==F){
+      if(globalmin==FALSE){
         lower=ax
         upper=bx
         xmin=matrix(0,1,2)
@@ -1170,7 +1170,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
       }
       colnames(min_bandwidth_)=c('golden', 'bandwidth')
 
-      if(globalmin==T){
+      if(globalmin==TRUE){
         h=xmin[which.min(xmin[,1]),2]
       }else{
         h=xmin[,2]
@@ -1205,7 +1205,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
         d=matrix(0,1,3)
         dist=d
         for(j in 1:n){
-          if(distancekm==T){
+          if(distancekm==TRUE){
             dif=abs(coord[i,1]-coord[j,1])
             raio=acos(-1)/180
             argument=sin(coord[i,2]*raio)*sin(coord[j,2]*raio)+cos(coord[i,2]*raio)*cos(coord[j,2]*raio)*cos(dif*raio)
@@ -1222,7 +1222,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
           if(d1!=0){
             d[1]=i
             d[2]=j
-            if(distancekm==T){
+            if(distancekm==TRUE){
               d[3]=arco*6371
             }else{
               d[3]=sqrt((coord[i,1]-coord[j,1])**2+(coord[i,2]-coord[j,2])**2)
@@ -1330,7 +1330,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
           d=matrix(0,1,3)
           dist=d
           for(j in 1:n){
-            if(distancekm==T){
+            if(distancekm==TRUE){
               dif=abs(coord[i,1]-coord[j,1])
               raio=acos(-1)/180
               argument=sin(coord[i,2]*raio)*sin(coord[j,2]*raio)+cos(coord[i,2]*raio)*cos(coord[j,2]*raio)*cos(dif*raio)
@@ -1347,7 +1347,7 @@ gss_gwbr <- function(yvar, xvar, lat, long, data, method=c("fixed_g", "fixed_bsq
             if(d1!=0){
               d[1]=i
               d[2]=j
-              if(distancekm==T){
+              if(distancekm==TRUE){
                 d[3]=arco*6371
               }else{
                 d[3]=sqrt((coord[i,1]-coord[j,1])**2+(coord[i,2]-coord[j,2])**2)

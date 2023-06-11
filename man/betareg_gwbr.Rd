@@ -42,7 +42,6 @@ A list that contains:
 Fits a global regression model using the beta distribution, recommended for rates and proportions, via maximum likelihood using a parametrization with mean (transformed by the link function) and precision parameter (called phi). For more details see Ferrari and Cribari-Neto (2004).
 }
 \examples{
-\dontrun{
 data(saopaulo)
 output_list=betareg_gwbr("prop_landline",c("prop_urb","prop_poor"),saopaulo)
 
@@ -52,5 +51,4 @@ output_list$parameter_estimates
 ## R2 and AICc
 output_list$r2
 output_list$aicc
-}
 }

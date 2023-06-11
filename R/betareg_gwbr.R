@@ -23,7 +23,6 @@
 #' }
 #'
 #' @examples
-#' \dontrun{
 #' data(saopaulo)
 #' output_list=betareg_gwbr("prop_landline",c("prop_urb","prop_poor"),saopaulo)
 #'
@@ -33,7 +32,6 @@
 #' ## R2 and AICc
 #' output_list$r2
 #' output_list$aicc
-#' }
 #' @export
 
 betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglog"), maxint=100){
@@ -53,7 +51,7 @@ betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglo
   }
 
   if(length(link)>1){
-    print('ERROR: Link Function should be one of logit, loglog, cloglog or probit.')
+    message('ERROR: Link Function should be one of logit, loglog, cloglog or probit.')
     stop()
   }
 
@@ -61,7 +59,7 @@ betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglo
     if(toupper(link)=="CLOGLOG"){yc <- log(-log(1-y))}else{
       if(toupper(link)=="LOGLOG"){yc <- -log(-log(y))}else{
         if(toupper(link)=="PROBIT"){yc <- qnorm(y)}else{
-          print('ERROR: Link Function should be one of logit, loglog, cloglog or probit.')
+          message('ERROR: Link Function should be one of logit, loglog, cloglog or probit.')
           stop()
         }
       }

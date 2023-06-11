@@ -15,8 +15,8 @@ gwbr(
   grid = data.frame(),
   method = c("fixed_g", "fixed_bsq", "adaptative_bsq"),
   link = c("logit", "probit", "loglog", "cloglog"),
-  distancekm = T,
-  global = F,
+  distancekm = TRUE,
+  global = FALSE,
   maxint = 100
 )
 }
@@ -77,7 +77,7 @@ A list that contains:
 Fits a local regression model for each location using the beta distribution, recommended for rates and proportions, using a parametrization with mean (transformed by the link function) and precision parameter (called phi). For more details see Da Silva and Lima (2017).
 }
 \examples{
-\dontrun{
+\donttest{
 data(saopaulo)
 output_list=gwbr("prop_landline",c("prop_urb", "prop_poor"),"y","x",116.3647,saopaulo)
 

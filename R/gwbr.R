@@ -42,7 +42,7 @@
 #' }
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data(saopaulo)
 #' output_list=gwbr("prop_landline",c("prop_urb", "prop_poor"),"y","x",116.3647,saopaulo)
 #'
@@ -54,12 +54,12 @@
 #' }
 #' @export
 
-gwbr <- function(yvar, xvar, lat, long, h, data, xglobal=NA_character_, grid=data.frame(), method=c("fixed_g", "fixed_bsq", "adaptative_bsq"), link=c("logit", "probit", "loglog", "cloglog"), distancekm=T, global=F, maxint=100){
-if(global==T){
+gwbr <- function(yvar, xvar, lat, long, h, data, xglobal=NA_character_, grid=data.frame(), method=c("fixed_g", "fixed_bsq", "adaptative_bsq"), link=c("logit", "probit", "loglog", "cloglog"), distancekm=TRUE, global=FALSE, maxint=100){
+if(global==TRUE){
   result=betareg_gwbr(yvar=yvar, xvar=xvar, data=data, link=link, maxint=maxint)
 }else{
     if(!is.numeric(h) | h<=0){
-      print("ERROR: 'h' must be numeric and greater than 0")
+      message("ERROR: 'h' must be numeric and greater than 0")
       stop()
     }
 
@@ -86,7 +86,7 @@ if(global==T){
     }
 
     if(length(link)>1){
-      print('ERROR: Link Function should be one of logit, loglog, cloglog or probit.')
+      message('ERROR: Link Function should be one of logit, loglog, cloglog or probit.')
       stop()
     }
 
@@ -140,7 +140,7 @@ if(global==T){
     }
 
     if(sum(toupper(link)==c("LOGIT", "PROBIT", "PROBIT", "LOGLOG", "CLOGLOG"))==0){
-      print('ERROR: Link Function should be one of logit, loglog, cloglog or probit.')
+      message('ERROR: Link Function should be one of logit, loglog, cloglog or probit.')
     }
 
     if(length(method)==3){
@@ -148,12 +148,12 @@ if(global==T){
     }
 
     if(sum(toupper(method)==c("FIXED_G", "FIXED_BSQ", "ADAPTIVE_BSQ"))==0){
-      print('ERROR: Method should be one of fixed_g, fixed_bsq or adaptive_bsq.')
+      message('ERROR: Method should be one of fixed_g, fixed_bsq or adaptive_bsq.')
       stop()
     }
 
     if(length(method)>1){
-      print('ERROR: Method should be one of fixed_g, fixed_bsq or adaptive_bsq.')
+      message('ERROR: Method should be one of fixed_g, fixed_bsq or adaptive_bsq.')
       stop()
     }
 
@@ -186,7 +186,7 @@ if(global==T){
     for(i in 1:m){
       seqi=matrix(i,n,1)
       dist=cbind(seqi,seq,as.matrix(dist_[,i]))
-      if(distancekm==T){
+      if(distancekm==TRUE){
         dist[,3]=dist[,3]*111
       }
       u=nrow(dist)
@@ -282,7 +282,7 @@ if(global==T){
     for(i in 1:m){
       seqi=matrix(i,n,1)
       dist=cbind(seqi,seq,as.matrix(dist_[,i]))
-      if(distancekm==T){
+      if(distancekm==TRUE){
         dist[,3]=dist[,3]*111
       }
       u=nrow(dist)
