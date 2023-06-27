@@ -583,7 +583,7 @@ if(global==TRUE){
     H=diag(as.matrix(sqrt(z)*x)%*%solve(t(x)%*%as.matrix(z*x))%*%t(x*sqrt(z)))
     cookD=H*(resstd*resstd)/(k*(1-H)*(1-H))
 
-    resstd2=(ye-mue)/sqrt((trigamma(mu%*%phi)+trigamma((1-mu)%*%phi))%*%(1-h))
+    resstd2=(ye-mue)/sqrt((trigamma(mu*phi)+trigamma((1-mu)*phi))*(1-H))
 
     eta=yhat
     mat=cbind(eta,yc)

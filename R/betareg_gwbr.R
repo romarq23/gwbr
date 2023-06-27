@@ -245,7 +245,7 @@ betareg_gwbr=function(yvar,xvar,data,link=c("logit", "probit", "loglog", "cloglo
   h <- diag(sqrt(z)*x%*%solve(t(x)%*%(z*x))%*%t(x*sqrt(z)))
   cookD <- h*(resstd*resstd)/(k%*%(1-h)*(1-h))
 
-  resstd2 <- (ye-mue)/sqrt((trigamma(mu%*%phi)+trigamma((1-mu)%*%phi))%*%(1-h))
+  resstd2 <- (ye-mue)/sqrt((trigamma(mu*phi)+trigamma((1-mu)*phi))*(1-h))
 
   eta <- x%*%beta
   mat <- cbind(eta,yc)
