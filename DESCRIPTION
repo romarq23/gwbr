@@ -1,6 +1,6 @@
 Package: gwbr
 Title: Local and Global Beta Regression
-Version: 1.0.4
+Version: 1.0.5
 Authors@R: c(
 	person("Roberto", "Marques", ,"robertomarques_23@yahoo.com.br", role = c("aut", "cre")),
 	person("Alan", "da Silva", email = "alansilva@unb.br", role = "aut"))
